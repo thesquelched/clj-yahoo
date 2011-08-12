@@ -116,19 +116,19 @@ authentication details.
 A simple YQL DSL is is provided in `yahoo.yql`. Most types are converted to 
 strings as you would expect, with a few exceptions:
 
-1.  Sets are converted into comma-separated lists of quoted values:
+Sets are converted into comma-separated lists of quoted values:
 
     (yahoo.yql/yql-form #{1 2 3})
     => "'1','2','3'"
 
-2. Vectors and sets are converted much the same as sets, but the items are unquoted:
+Vectors and sets are converted much the same as sets, but the items are unquoted:
 
     (yahoo.yql/yql-form [1 2 3])
     => "1,2,3"
 
 There are three functions of interest: `select`, `table`, and `where`:
 
-1.  `where` takes a predicate, much like how you would do in normal Clojure code:
+`where` takes a predicate, much like how you would do in normal Clojure code:
 
     (where (= :key 1))
     => "WHERE key = '1'"
@@ -139,7 +139,7 @@ There are three functions of interest: `select`, `table`, and `where`:
     (where (!like :str "abc%"))
     => "WHERE str NOT LIKE 'abc%'"
 
-2.  `table` takes, at minimum, a table name. You can optionally provide a vector of columns:
+`table` takes, at minimum, a table name. You can optionally provide a vector of columns:
 
     (table :people)
     => "* FROM people"
@@ -147,7 +147,8 @@ There are three functions of interest: `select`, `table`, and `where`:
     (table :people [:id :name])
     => "id,name FROM people"
 
-3. `select` puts everything together:
+`select` puts everything together:
+
 
     (select (table :people [:name]) (where (= :id 1)))
     => "SELECT name FROM people WHERE id = '1'"
