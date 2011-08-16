@@ -22,12 +22,8 @@
 (defmethod url-form
   ::list
   [form]
-  (let [[resource p-map] form
-        r-name (name resource)
-        [res pre sep] (if (re-matches #".+\*$" r-name) 
-                        [(subs r-name 0 (dec (count r-name))) \? \&] 
-                        [r-name \; \;])]
-    ((combine res pre sep) p-map)))
+  (let [[resource p-map] form] 
+    (combine (name resource) p-map)))
 
 (defmethod url-form
   :default
@@ -48,13 +44,6 @@
   [q-string]
   `(query YQL-URL [:yql* {:q ~q-string}]))
 
-(defn- combine
-  [resource prefix sep]
-  (fn [p-map]
-    (let [params (for [[k v] p-map]
-                   (str (url-form k) "=" (url-form v)))]
-      (apply str resource prefix (join sep params)))))
-
 (defn remove-star
   [k]
   (let [s (name k)
@@ -66,3 +55,9 @@
   (or (keyword? x) 
       (and (coll? x) 
            (not (= \* (-> x first name last))))))
+
+(defn- combine
+  [resource p-map]
+  (let [params (for [[k v] p-map]
+                 (str (url-form k) "=" (url-form v)))]
+    (apply str resource \; (join \; params))))

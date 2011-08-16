@@ -1,4 +1,4 @@
-(defproject clj-yahoo "0.1.0"
+(defproject clj-yahoo "0.1.1-SNAPSHOT"
   :description "Clojure interface to Yahoo APIs."
   :dependencies [[clojure "1.2.0"]
                  [clojure-contrib "1.2.0"]
