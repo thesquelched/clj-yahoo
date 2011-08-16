@@ -1,3 +1,4 @@
 TODO for clj-yahoo
 
 -Change README.markdown to reflect changes to yahoo.core and yahoo.query
+-Add tests
