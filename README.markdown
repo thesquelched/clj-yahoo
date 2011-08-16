@@ -79,18 +79,41 @@ token.
 
 # Making queries #
 
-There are two main types of queries available: URL and YQL. Both are RESTful
-queries sent to a Yahoo URL resource, and both only require your 
-authentication credentials and an appropriate query string. You can construct
-your query manually, or you can use one of the provideded DSL's. For example,
-here are two identical queries:
+Yahoo queries have to be constructed, then sent off. The first part is done
+using `yahoo.query/query`. This produces two things: a resource URL and
+a map of query parameters. To construct a query, you need a base URL and
+a sequence of keyword constructs to build the full URL and parameter map.
+Plain keywords are appended to the base URL in sequence:
 
-    (use '[yahoo.url :only [query]])
+    (use '[yahoo.query :only [query]])
 
-    (def query1 "http://weather.yahooapis.com/forecastrss?w=2502265")
-    (def query2 (query "http://weather.yahooapis.com" 
-                       [:forecastrss* {:w 2502265}]))
-    
+    (query "http://www.google.com" :search)
+    => ["http://www.google.com/search" nil]
+
+You can also give a keyword-map pair to specify parameters. Normal keywords
+encode their parameters directly into the URL:
+
+    (query "http://fantasysports.yahooapis.com/fantasy/v2" 
+           [:users {:use_login 1}] :games)
+    => ["http://fantasysports.yahooapis.com/fantasy/v2/users;use_login=1/games"
+        nil]
+
+You can instead use a keyword ending with an asterix, which will add the
+keyword to the URL string and keep the parameter map intact:
+
+    (query "http://weather.yahooapis.com" [:forecastrss* {:w 2502265}])
+    => ["http://weather.yahooapis.com/forecastrss" {:w 2502265}]
+
+This will be encoded like `http://weather.yahooapis.com/forecastrss?w=2502265`.
+
+YQL queries can be encoded by supplying the YQL URL and a parameter map
+like `{:q "SELECT * FROM table"}`. To simplify the process, you can use
+the `yql-query` macro:
+
+    (use '[yahoo.query :only [yql-query]])
+
+    (yql-query "SELECT * FROM table")
+    => ["http://query.yahooapis.com/v1/public/yql" {:q "SELECT * FROM table"}]
 
 `clj-yahoo` takes care of signing your API queries; all you have to do is
 supply the query string. However, there is one complication: Yahoo OAuth 
@@ -102,14 +125,17 @@ token is expired using the `expired?` function
 You may elect to either refresh access tokens manually (with the `refresh` 
 function), or automatically via the `with-oauth` macro:
 
-    (yahoo/with-oauth my-auth (yahoo/url-query query1))
+    (def myquery (yql-query "SELECT * FROM table"))
+    (yahoo/with-oauth my-auth (yahoo/ask myquery))
 
-Actual queries are made with either the `yql-query` or `url-query` function. 
-You must provide a query string, but you may optionally provide your 
-authentication details.
+Sending the query to Yahoo is done using the `ask` function. You must use
+`query` to construct the query itself. Also, if you plan to refresh your
+tokens manually (so you won't be using `with-oauth`), you can give your
+authentication credentials to `ask` as well:
 
-    (yahoo/yql-query my-auth 
-                     "select * from fantasysports.teams where team_key = '...')
+    (yahoo/ask my-auth 
+               (query "http://weather.yahooapis.com" 
+                      [:forecastrss* {:w 2502265}]))
 
 # YQL details #
 
@@ -152,24 +178,6 @@ There are three functions of interest: `select`, `table`, and `where`:
 
     (select (table :people [:name]) (where (= :id 1)))
     => "SELECT name FROM people WHERE id = '1'"
-
-# URL queries #
-
-URL queries, for lack of a better term, look like this:
-
-    http://www.google.com/search?q=puppies
-    http://fantasysports.yahooapis.com/fantasy/v2/game/223/leagues;league_keys=223.l.431
-
-URL queries work the same as YQL queries, except for keywords. Keywords with
-an asterix at the end are interpreted like the former example URL, while those
-without are treated like the latter. Here is how to create each of these URL's:
-
-    (yahoo.url/query "http://www.google.com" [:search* {:q "puppies"}])
-    => "http://www.google.com/search?q=puppies"
-
-    (yahoo.url/query "http://fantasysports.yahooapis.com/fantasy/v2"
-                     :game 223 [:leagues {:league_keys "223.l.431"}])
-    => "http://fantasysports.yahooapis.com/fantasy/v2/game/223/leagues;league_keys=223.l.431"
 
 # Author information #
 

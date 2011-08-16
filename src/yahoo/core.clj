@@ -82,9 +82,9 @@
       (refresh auth)
       auth)))
 
-(defn query 
-  "Make a YQL query function. query must be a valid YQL string."
-  ([auth q-info] ((query q-info) auth))
+(defn ask 
+  "Make a Yahoo query or a query function"
+  ([auth q-info] ((ask q-info) auth))
   ([[url url-map]] 
    (fn [auth]
      (let [acc-tok (:token auth)
