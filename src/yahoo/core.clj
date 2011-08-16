@@ -82,35 +82,20 @@
       (refresh auth)
       auth)))
 
-
-(defn yql-query 
+(defn query 
   "Make a YQL query function. query must be a valid YQL string."
-  ([auth query] ((yql-query query) auth))
-  ([query] 
+  ([auth q-info] ((query q-info) auth))
+  ([[url url-map]] 
    (fn [auth]
      (let [acc-tok (:token auth)
            credentials (oauth/credentials (:consumer auth)
                                           (:oauth_token acc-tok) 
                                           (:oauth_token_secret acc-tok) 
                                           :GET 
-                                          YQL-URL 
-                                          {:q query})
-           q (http/encode-query (marge credentials {:q query}))]
-       (parse (str YQL-URL "?" q))))))
-
-(defn url-query
-  "Make a query to a url resource."
-  ([auth query] ((url-query query) auth))
-  ([query]
-   (fn [auth] 
-     (let [acc-tok (:token auth)
-           credentials (oauth/credentials (:consumer auth)
-                                          (:oauth_token acc-tok) 
-                                          (:oauth_token_secret acc-tok) 
-                                          :GET 
-                                          query)
-           q (http/encode-query credentials)]
-       (parse (str query "?" q))))))
+                                          url 
+                                          url-map)
+           q (http/encode-query (merge credentials url-map))]
+       (parse (str url "?" q))))))
 
 (defmacro with-oauth
   "Runs query with the oauth credentials in auth, which will be automatically

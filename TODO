@@ -1,5 +1,3 @@
 TODO for clj-yahoo
 
--url-query doesn't work with 'question mark' queries, i.e.
-  "http://url.com/q?key=value". Might have to make a separate query function
-  to handle these.
+-Change README.markdown to reflect changes to yahoo.core and yahoo.query

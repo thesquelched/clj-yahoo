@@ -1,11 +1,12 @@
 (ns 
   #^{:author "Scott Kruger"
      :doc "Yahoo API interface library for Clojure"}
-  yahoo.url
-  (:use [clojure.contrib.string :only (as-str join)] 
-        [clojure.walk :only (postwalk-replace)]))
+  yahoo.query
+  (:use [clojure.contrib.string :only (as-str join)]))
 
-(declare combine)
+(def YQL-URL "http://query.yahooapis.com/v1")
+
+(declare combine remove-star url-part?)
 
 (defmulti url-form class)
 
@@ -27,7 +28,6 @@
                         [(subs r-name 0 (dec (count r-name))) \? \&] 
                         [r-name \; \;])]
     ((combine res pre sep) p-map)))
-    
 
 (defmethod url-form
   :default
@@ -36,7 +36,17 @@
 
 (defmacro query
   [url & resources]
-  `(join "/" (cons ~url (map url-form (list ~@resources)))))
+  (let [[urls q-maps] (split-with url-part? resources)
+        [k q-map] (first q-maps)
+        urls (if (seq q-maps)
+               (conj urls (remove-star k))
+               urls)] 
+    `(vector (join "/" (cons ~url (map url-form (list ~@urls))))
+             ~q-map)))
+
+(defmacro yql-query
+  [q-string]
+  `(query YQL-URL [:yql* {:q ~q-string}]))
 
 (defn- combine
   [resource prefix sep]
@@ -44,3 +54,15 @@
     (let [params (for [[k v] p-map]
                    (str (url-form k) "=" (url-form v)))]
       (apply str resource prefix (join sep params)))))
+
+(defn remove-star
+  [k]
+  (let [s (name k)
+        k-str (apply str (take-while #(not (= \* %)) s))]
+    (keyword k-str)))
+
+(defn url-part?  
+  [x] 
+  (or (keyword? x) 
+      (and (coll? x) 
+           (not (= \* (-> x first name last))))))
