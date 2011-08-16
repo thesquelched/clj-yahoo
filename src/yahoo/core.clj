@@ -3,7 +3,8 @@
      :doc "Yahoo API interface library for Clojure"}
   yahoo.core
   (:require [oauth.client :as oauth] 
-            [com.twinql.clojure.http :as http]))
+            [com.twinql.clojure.http :as http])
+  (:use     [clojure.xml :only [parse]]))
 
 ; Constants
 (def MSEC_IN_HOUR 3600000)
@@ -93,10 +94,9 @@
                                           (:oauth_token_secret acc-tok) 
                                           :GET 
                                           YQL-URL 
-                                          {:q query})]
-       (http/get YQL-URL 
-                 :query (merge credentials {:q query}) 
-                 :as :string)))))
+                                          {:q query})
+           q (http/encode-query (marge credentials {:q query}))]
+       (parse (str YQL-URL "?" q))))))
 
 (defn url-query
   "Make a query to a url resource."
@@ -108,10 +108,9 @@
                                           (:oauth_token acc-tok) 
                                           (:oauth_token_secret acc-tok) 
                                           :GET 
-                                          query)]
-       (http/get query 
-                 :query credentials 
-                 :as :string)))))
+                                          query)
+           q (http/encode-query credentials)]
+       (parse (str query "?" q))))))
 
 (defmacro with-oauth
   "Runs query with the oauth credentials in auth, which will be automatically
