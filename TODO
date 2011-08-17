@@ -1,4 +1,5 @@
 TODO for clj-yahoo
 
 -Add YQL filtering functions, like sort.
--Could always add more tests
+-Add tests for core functions. Will probably want to create a separate Yahoo
+  API key (token and secret) for this.

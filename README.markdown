@@ -179,6 +179,10 @@ There are three functions of interest: `select`, `table`, and `where`:
     (select (table :people [:name]) (where (= :id 1)))
     => "SELECT name FROM people WHERE id = '1'"
 
+# Additional examples #
+
+Please look at the tests for more examples of how YQL and othe queries work.
+
 # Author information #
 
 `clj-yahoo` was written by Scott Kruger. It's my first shot at a Clojure 
