@@ -34,10 +34,11 @@
   [url & resources]
   (let [[urls q-maps] (split-with url-part? resources)
         [k q-map] (first q-maps)
-        urls (if (seq q-maps)
-               (conj urls (remove-star k))
-               urls)] 
-    `(vector (join "/" (cons ~url (map url-form (list ~@urls))))
+        url-vec (vec urls)
+        url-keys (if (seq q-maps) 
+                   (conj url-vec (remove-star k)) 
+                   url-vec)] 
+    `(vector (join "/" (cons ~url (map url-form (list ~@url-keys))))
              ~q-map)))
 
 (defmacro yql-query
