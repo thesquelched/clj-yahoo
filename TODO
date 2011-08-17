@@ -1,4 +1,4 @@
 TODO for clj-yahoo
 
--Add tests
 -Add YQL filtering functions, like sort.
+-Could always add more tests
