@@ -1,5 +1,9 @@
 TODO for clj-yahoo
 
 -Add YQL filtering functions, like sort.
+-Add INSERT, UPDATE, and DELETE YQL operations. These will require HTTP
+  operations POST, PUT, and DELETE, respectively, which may require another
+  fundamental change to the code structure. Also, I'm not sure if I can
+  abstract away the HTTP request details.
 -Add tests for core functions. Will probably want to create a separate Yahoo
   API key (token and secret) for this.
