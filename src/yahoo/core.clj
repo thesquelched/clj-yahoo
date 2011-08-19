@@ -62,6 +62,7 @@
              :token (oauth/access-token consumer req-token verifier)
              :expiration (+ now MSEC_IN_HOUR)))))
 
+(def *yahoo-auth* nil)
 
 ; Begin yahoo.core functions
 
@@ -84,25 +85,24 @@
 
 (defn ask 
   "Make a Yahoo query or a query function"
-  ([auth q-info] ((ask q-info) auth))
-  ([[url url-map]] 
-   (fn [auth]
-     (let [acc-tok (:token auth)
-           credentials (oauth/credentials (:consumer auth)
-                                          (:oauth_token acc-tok) 
-                                          (:oauth_token_secret acc-tok) 
-                                          :GET 
-                                          url 
-                                          url-map)
-           q (http/encode-query (merge credentials url-map))]
-       (parse (str url "?" q))))))
+  [[url url-map]] 
+   (let [acc-tok (:token *yahoo-auth*)
+         credentials (oauth/credentials (:consumer *yahoo-auth*)
+                                        (:oauth_token acc-tok) 
+                                        (:oauth_token_secret acc-tok) 
+                                        :GET 
+                                        url 
+                                        url-map)
+         q (http/encode-query (merge credentials url-map))]
+     (parse (str url "?" q))))
 
 (defmacro with-oauth
   "Runs query with the oauth credentials in auth, which will be automatically
   refreshed if it has expired (side effect)."
   [auth query]
-  `(do
-     (when (expired? ~auth)
-       (def ~auth (refresh ~auth)))
-     (~query ~auth)))
+  `(binding [*yahoo-auth* ~auth] 
+     (do 
+       (when (expired? ~auth) 
+         (def ~auth (refresh ~auth))) 
+       ~query)))
 
