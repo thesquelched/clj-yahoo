@@ -38,8 +38,10 @@
         url-keys (if (seq q-maps) 
                    (conj url-vec (remove-star k)) 
                    url-vec)] 
-    `(vector (join "/" (cons ~url (map url-form (list ~@url-keys))))
-             ~q-map)))
+    `(array-map
+       :url     (join "/" (cons ~url (map url-form (list ~@url-keys))))
+       :params  ~q-map
+       :method  :GET)))
 
 (defmacro yql-query
   [q-string]

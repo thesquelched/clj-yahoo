@@ -85,16 +85,16 @@
 
 (defn ask 
   "Make a Yahoo query or a query function"
-  [[url url-map]] 
+  [query] 
    (let [acc-tok (:token *yahoo-auth*)
          credentials (oauth/credentials (:consumer *yahoo-auth*)
                                         (:oauth_token acc-tok) 
                                         (:oauth_token_secret acc-tok) 
                                         :GET 
-                                        url 
-                                        url-map)
-         q (http/encode-query (merge credentials url-map))]
-     (parse (str url "?" q))))
+                                        (:url query)
+                                        (:params query))
+         q (http/encode-query (merge credentials (:params query)))]
+     (parse (str (:url query) "?" q))))
 
 (defmacro with-oauth
   "Runs query with the oauth credentials in auth, which will be automatically

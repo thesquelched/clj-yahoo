@@ -4,6 +4,12 @@
         [yahoo.yql   :only [select table where]]
         :reload-all))
 
+(defn make-query
+  [url params method]
+  {:url url
+   :params params
+   :method method})
+
 (deftest ^{:doc "Query tests"}
   query-test
   (let [goog  "http://www.google.com"
@@ -11,34 +17,34 @@
         pms   {:use_login 1}
         more  (merge pms {:a 2 :b "three"})]
     
-    (is (= [(str goog "/test") nil]
+    (is (= (make-query (str goog "/test") nil :GET)
            (query goog :test)))
     
-    (is (= [(str goog "/one/two/three/four") nil]
+    (is (= (make-query (str goog "/one/two/three/four") nil :GET)
            (query goog :one :two :three :four)))
     
-    (is (= [(str fs "/users;use_login=1") nil]
+    (is (= (make-query (str fs "/users;use_login=1") nil :GET)
            (query fs [:users {:use_login 1}])))
     
-    (is (= [(str fs "/users;use_login=1/games") nil]
+    (is (= (make-query (str fs "/users;use_login=1/games") nil :GET)
            (query fs [:users {:use_login 1}] :games)))
     
-    (is (= [(str fs "/users;use_login=1/games") nil]
+    (is (= (make-query (str fs "/users;use_login=1/games") nil :GET)
            (query fs [:users pms] :games)))
     
-    (is (= [(str goog "/search") {:q "test"}]
+    (is (= (make-query (str goog "/search") {:q "test"} :GET)
            (query goog [:search* {:q "test"}])))
     
-    (is (= [(str goog "/nonsense;a=1/foo") {:use_login 1}]
+    (is (= (make-query (str goog "/nonsense;a=1/foo") {:use_login 1} :GET)
            (query goog [:nonsense {:a 1}] [:foo* pms])))
 
-    (is (= [(str goog "/nonsense;a=1/foo") {:use_login 1}]
+    (is (= (make-query (str goog "/nonsense;a=1/foo") {:use_login 1} :GET)
            (query goog [:nonsense {:a 1}] [:foo* pms] :extraneous :keywords)))
     
-    (is (= [(str goog "/one/nonsense;a=1/two/foo") {:use_login 1}]
+    (is (= (make-query (str goog "/one/nonsense;a=1/two/foo") {:use_login 1} :GET)
            (query goog :one [:nonsense {:a 1}] :two [:foo* pms])))
     
-    (is (= [(str goog "/test;b=three;a=2;use_login=1/foo") more]
+    (is (= (make-query (str goog "/test;b=three;a=2;use_login=1/foo") more :GET)
            (query goog [:test more] [:foo* more])))
     ))
 
@@ -47,9 +53,9 @@
   (let [test-q  (select (table :test))
         yql-url "http://query.yahooapis.com/v1"]
 
-    (is (= [(str yql-url "/yql") {:q test-q}]
+    (is (= (make-query (str yql-url "/yql") {:q test-q} :GET)
            (yql-query test-q)))
 
-    (is (= [(str yql-url "/yql") {:q "SELECT cols FROM table WHERE id = '4'"}]
+    (is (= (make-query (str yql-url "/yql") {:q "SELECT cols FROM table WHERE id = '4'"} :GET)
            (yql-query (select (table :table [:cols]) (where (= :id 4))))))
     ))
